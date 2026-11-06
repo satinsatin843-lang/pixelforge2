@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PixelForge - AI Image & Video</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#0b0b14;color:#eee}
+.w{max-width:520px;margin:auto;padding:18px}h1{font-size:30px;margin:10px 0}.g{background:linear-gradient(90deg,#7c5cff,#ff5c9d);-webkit-background-clip:text;color:transparent}
+.c{background:#161626;border:1px solid #2a2a44;border-radius:16px;padding:16px;margin:14px 0}
+input,textarea{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #333;background:#0f0f1c;color:#fff;font-size:16px}
+button,.b{display:block;width:100%;padding:13px;border:0;border-radius:10px;background:linear-gradient(90deg,#7c5cff,#ff5c9d);color:#fff;font-size:16px;font-weight:600;margin-top:8px;text-align:center;text-decoration:none}
+.s{background:#2a2a44}.p{font-size:34px;font-weight:700}.m{color:#aaa;font-size:14px}.e{color:#ff6b6b}img,video{width:100%;border-radius:12px;margin-top:10px}
+.t{display:flex;gap:8px}.t button{margin:0}#q{display:flex;justify-content:center;margin:12px 0;background:#fff;padding:10px;border-radius:10px}.h{display:none}</style></head><body><div class="w">
+<div id="A"><h1>🎨 <span class="g">PixelForge</span></h1><p class="m">Text se AI Image aur Video banayein.</p>
+<div class="c"><div class="p">₹99<span class="m">/month</span></div><p class="m">✔ 3 din ka free trial (5 images)<br>✔ 100 credits/month<br>✔ AI Images + Videos<br>✔ UPI se payment</p></div>
+<div class="c"><input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password (6+ akshar)">
+<button onclick="au('signup')">Free Trial Shuru Karein</button><button class="s" onclick="au('login')">Login</button><p id="ae" class="e"></p></div></div>
+<div id="D" class="h"><h1>🎨 <span class="g">PixelForge</span></h1><div class="c"><div id="st" class="m"></div></div>
+<div class="c"><div class="t"><button id="ti" onclick="tb('image')">Image</button><button id="tv" class="s" onclick="tb('video')">Video</button></div>
+<textarea id="pr" rows="3" placeholder="Kya banana hai? Jaise: sunset par ek sher"></textarea><button onclick="go()">Generate</button><p id="msg" class="m"></p><div id="res"></div></div>
+<div class="c"><b>₹99 Plan Lein</b><p class="m">Neeche pay karein, phir UTR number daalein.</p>
+<a id="up" class="b" href="#">UPI App Se Pay Karein ₹99</a><div id="q"></div><p class="m" style="text-align:center">UPI: 9839690620@axl</p>
+<input id="utr" placeholder="12 ank ka UTR / Ref No."><button class="s" onclick="pay()">Payment Jama Karein</button><p id="pm" class="m"></p></div>
+<button class="s" onclick="localStorage.clear();location.reload()">Logout</button></div></div>
+<script>
+const UPI='upi://pay?pa=9839690620@axl&pn=PixelForge&am=99&cu=INR&tn=PixelForge%20Plan';
+let T=localStorage.pf||'',mode='image';const $=i=>document.getElementById(i);
+async function api(u,b){const r=await fetch(u,{method:b?'POST':'GET',headers:{'Content-Type':'application/json','x-token':T},body:b?JSON.stringify(b):undefined});const j=await r.json();if(!r.ok)throw j.error||'Error';return j}
+async function au(k){try{const j=await api('/api/'+k,{email:$('em').value,password:$('pw').value});T=j.token;localStorage.pf=T;init()}catch(e){$('ae').textContent=e}}
+function show(s){$('st').innerHTML=(s.paid?'✅ Paid plan • '+new Date(s.paidUntil).toLocaleDateString():s.trial?'🎁 Trial • '+new Date(s.trialEnd).toLocaleDateString()+' tak':'⛔ Trial khatam')+'<br>Credits: <b>'+s.credits+'</b>'}
+async function init(){if(!T)return;try{show(await api('/api/me'));$('A').className='h';$('D').className='';$('up').href=UPI;if(!$('q').firstChild)new QRCode($('q'),{text:UPI,width:170,height:170})}catch{localStorage.clear();T=''}}
+function tb(m){mode=m;$('ti').className=m=='image'?'':'s';$('tv').className=m=='video'?'':'s'}
+async function go(){const p=$('pr').value;$('msg').textContent='Ban raha hai...';$('res').innerHTML='';
+try{if(mode=='image'){const j=await api('/api/image',{prompt:p});$('res').innerHTML='<img src="'+j.image+'"><a class="b s" download="pixelforge.png" href="'+j.image+'">Download</a>';$('msg').textContent='';}
+else{const j=await api('/api/video',{prompt:p});$('msg').textContent='Video mein 1-3 minute lagte hain, ruke rahein...';
+while(1){await new Promise(r=>setTimeout(r,8000));const s=await api('/api/video/status?op='+encodeURIComponent(j.op));if(s.done){if(s.error)throw s.error;$('res').innerHTML='<video controls src="'+s.url+'"></video>';$('msg').textContent='';break}}}
+init()}catch(e){$('msg').innerHTML='<span class="e">'+e+'</span>'}}
+async function pay(){try{await api('/api/pay',{utr:$('utr').value});$('pm').textContent='✅ Jama ho gaya. Verify hone par plan chalu ho jayega.'}catch(e){$('pm').innerHTML='<span class="e">'+e+'</span>'}}
+init();</script></body></html>
